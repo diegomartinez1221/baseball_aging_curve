@@ -2,11 +2,16 @@ library(shiny)
 library(shinythemes)
 library(tidyverse)
 
+#data required
+
 complete_dataset<-read_csv("complete_dataset.csv")
 salary_dataset<-read_csv("salary_dataset.csv")
 
-# Define UI for application that draws a histogram
+# Define UI for application and theme
+
 ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
+  
+  # first tab 
   
   tabPanel("Introduction",
            titlePanel("Inefficiencies in Baseball Markets Due to Aging Curves"),
@@ -17,17 +22,23 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
              br(),
              br(),
              
-             plotOutput("tierPlot"),
-             plotOutput("salaryPlot")
+             htmlOutput("plotExplanation"), 
+             
+             plotOutput("tierPlot")
+             
            ))
   ,
   
+  #second tab
 
   tabPanel("Comparing Players",
+           
            # Application title
-           titlePanel("Aging Curve"),
+           
+           titlePanel("Individual Aging Curves"),
            
            # Select player from dropdown menu for their aging curve graph. 
+           
            sidebarLayout(
              sidebarPanel(
                selectInput("name",label = strong("Players"),
@@ -37,13 +48,17 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                )),
              
              # Show aging curve plot
+             
              mainPanel(
                plotOutput("linePlot")
              )
            )
   ),
   
+  # tab 3
+  
   tabPanel("Comparing Positions",
+           titlePanel("How Players At Different Positions Age"),
            sidebarLayout(
              sidebarPanel(
                radioButtons("tier", 
@@ -64,12 +79,17 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
 )
 )
 # Define server logic required to show lineplot
+
 server <- function(input, output) {
+  
   #necessary libraries 
+  
   library(ggplot2)
   library(tidyverse)
   library(ggthemes)
   library(directlabels)
+  
+  # text explanation of project
   
   output$warExplanation<-renderUI({
 
@@ -112,6 +132,8 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
   HTML(paste(ex_1, br(),ex_2, br(), ex_3, ex_4))
   
   
+  
+  
 })  
   
   output$histPlot<- renderPlot({
@@ -142,15 +164,31 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
       theme(axis.title = element_text(colour = "black" ))
   })
   
+  output$plotExplanation<-renderUI({
+    
+    
+    ex_1<-p("There is a stark difference between the very best players in the MLB
+            and everyday starters let alone the average player. Thus, I chose to tier 
+            my dataset for analysis purposes. Otherwise, I believe the generalized aging 
+            curves would not be representative. By taking the z-score of the average WAR
+            for each player across their career, I broke the dataset into 5 tiers, tier 1
+            being the very best to ever play the game. Even they show the same levels 
+            of decline as they age.")  
+  
+    HTML(paste(ex_1))
+  })
   
   # tab 2 ------------------------------------ 
   #creating variables for line graph. Needed to be reactive so that it changes
   #as each player in the drop down menu is selected.
+  
   subset<-reactive({complete_dataset%>% filter(name_common %in%input$name)})
   
   
   output$linePlot <- renderPlot({
+    
     # draws line plot for player chosen
+    
     ggplot(subset(), aes(x=subset()$age, y=subset()$WAR, color = subset()$name_common))+
       geom_smooth(formula = y~x+x^2, se = FALSE)+
       geom_line(alpha = 0.30)+
@@ -176,7 +214,9 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
       group_by(age, POS)%>%
       mutate(people = n(),ave_war = mean(WAR))%>%
       filter(people>3)%>%
+      
       # draws line plot for player chosen
+      
       ggplot(aes(x=age, y=ave_war))+
       geom_smooth(aes(color= POS, fill = POS))+
       geom_dl(aes(label = POS), method = list(dl.combine( "last.points"))) +
