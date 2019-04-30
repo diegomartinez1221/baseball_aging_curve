@@ -4,12 +4,20 @@ library(dplyr)
 library(Lahman)
 library(robustHD)
 library(lubridate)
+library(fs)
 
 download.file("https://www.baseball-reference.com/data/war_daily_bat.txt", dest ="bbref.csv", mode = "wb")
 
+download.file("https://github.com/chadwickbureau/baseballdatabank/archive/v2019.2.zip", 
+              destfile = "Lahman_Data.zip",
+              mode = "wb")
+
+untar("Lahman_Data.zip")
 
 
-People <- read_csv("People.csv")
+People<-read_csv("./baseballdatabank-2019.2/core/People.csv")
+
+file_delete(c("baseballdatabank-2019.2/", "Lahman_Data.zip"))
 
 bbref <- read_csv("bbref.csv", col_types = cols(WAR = col_number(), salary = col_number()))
 
