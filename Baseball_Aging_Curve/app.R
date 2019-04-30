@@ -127,6 +127,12 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                                   choices = c("C","1B", "2B","3B","SS","OF"), 
                                   selected = "OF")),
           mainPanel(
+            h5("For my analysis of salaries, you will notice I used Standard Salaries
+               instead of just Salary. This is because the datset goes all the way back 
+               to 1950. The effects of inflation and the shear amount of money in baseball
+               today distort the graphs. Thus I standardized salaries for each year meaning 
+               the y axis is salaries compared to the rest of the league in that year."),
+            
             plotOutput("salaryPlot"),
             br(),
             br(),
@@ -494,7 +500,8 @@ output$salaryposPlot <- renderPlot({
     geom_smooth(se= FALSE, aes(color= POS))+
     scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
     scale_y_continuous(breaks = seq(-1,2,0.5), limits = c(-1,2)) +
-    labs(x="Age", y = "Standard Salary", color = "Position")+
+    labs(x="Age", y = "Standard Salary", color = "Position",
+         title = "Salary Curves by Position")+
     theme_fivethirtyeight()+
     theme(axis.title = element_text(colour = "black" ))
 })
@@ -551,6 +558,7 @@ max_WAR<-salary_dataset%>%group_by(bbrefID)%>%
      
    summarise(avg_age_war = mean(age_highest_war), avg_age_salary= mean(age_highest_salary))%>%
    gt()%>%
+   tab_header(title = "Comparing Age of Peak Performance to Age of Highest Pay")%>%
    cols_label(POS= "Position",
               avg_age_war = "Age of Peak War",
               avg_age_salary= "Age of Peak Salary")%>%
