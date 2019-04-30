@@ -52,7 +52,10 @@ batter<- batters%>%
   group_by(year_ID)%>%
   mutate(bbrefID = player_ID)
 
-Hitters_data<-batter%>%inner_join(Lahman_all, by= "bbrefID")%>%filter(!is.na(POS), year_ID<2019)
+active<-batter%>% group_by(bbrefID)%>%mutate(last_year = max(year_ID),active = last_year==2019)%>%distinct(bbrefID, active)
+
+Hitters_data<-batter%>%inner_join(Lahman_all, by= "bbrefID")%>%filter(!is.na(POS), year_ID<2019)%>%inner_join(active, by="bbrefID")
+
 
 
 players_totals<-Hitters_data%>%
@@ -95,34 +98,12 @@ fourth_tier<- fourth_tier %>% inner_join(Hitters_data, by = "player_ID")%>% muta
 
 fifth_tier<- fifth_tier %>% inner_join(Hitters_data, by = "player_ID")%>% mutate(tier= as.character(5))
 
-complete_dataset<- bind_rows(top_average, second_tier, third_tier, fourth_tier, fifth_tier)%>%select(-(runs_bat:runs_above_avg_def), -(teamRpG:TB_lg))%>%mutate(active = year_ID==2019, 
-                                                                                                                                                                OF= as.numeric(POS == "OF"))
-mutate(active = year_ID==2019)
+complete_dataset<- bind_rows(top_average, second_tier, third_tier, fourth_tier, fifth_tier)%>%select(-(runs_bat:runs_above_avg_def), -(teamRpG:TB_lg))
 
 salary_dataset<-complete_dataset%>%filter(!is.na(salary))%>%group_by(year_ID)%>%mutate(mean_salary = mean(salary), 
                                                                                        sd_salary = sd(salary),
                                                                                        standard_salary= (salary-mean_salary)/sd_salary)
 
-library(moderndiven)
-attach(top_average)
-top_average<-top_average%>%mutate(age = as.numeric(age))
-fit=lm(top_average$WAR~top_average$age+I(top_average$age^2)+POS)
-summary(fit)
-
-
-plot(top_average$age,top_average$WAR)
-ord= order(top_average$age)
-lines(top_average$age[ord],predict(fit)[ord],col="red")
-
-plot(mydata$mpg,mydata$price)
-ord=order(mydata$mpg)
-lines(mydata$mpg[ord],predict(fit)[ord],col="red")
-plot(top_average$age,top_average$WAR)
-abline(fit,col="Red")
-
-
-
-top_average%>%ungroup()%>%distinct(player_ID, POS)%>%count(POS)
 
 complete_dataset<-complete_dataset%>%group_by(player_ID)%>%mutate(war_prior= lag(WAR, 1, default = 0), war_prior_2= lag(WAR,2, default = 0))
 

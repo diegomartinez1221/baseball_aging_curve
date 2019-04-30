@@ -1,7 +1,7 @@
 library(shiny)
 library(shinythemes)
 library(tidyverse)
-
+library(gt)
 #data required
 
 complete_dataset<-read_csv("complete_dataset.csv")
@@ -61,7 +61,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
            titlePanel("How Players At Different Positions Age"),
            sidebarLayout(
              sidebarPanel(
-               radioButtons("tier", 
+                 radioButtons("tier", 
                             "Tier:", 
                             unique(complete_dataset$tier),
                             selected = 1),
@@ -75,7 +75,38 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
              
              
            )
+  ),
+  
+  tabPanel("Problems with Salaries",
+           titlePanel("Salary Curves Do Not Immitate Performance Curves"),
+           sidebarLayout(fluid = TRUE,
+             sidebarPanel(
+               radioButtons("salary_tier", 
+                            "Tier:", 
+                            unique(salary_dataset$tier),
+                            selected = "1"),
+               checkboxGroupInput("salary_position",
+                                  "Position:",
+                                  choices = c("C","1B", "2B","3B","SS","OF"), 
+                                  selected = "OF")),
+          mainPanel(
+            plotOutput("salaryPlot"),
+            br(),
+            br(),
+            plotOutput("salaryposPlot"),
+            br(),
+            br(),
+            gt_output("peakTable")
+          )
+           )
   )
+  
+  
+  
+  
+  
+  
+  
 )
 )
 # Define server logic required to show lineplot
@@ -190,9 +221,9 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
     # draws line plot for player chosen
     
     ggplot(subset(), aes(x=subset()$age, y=subset()$WAR, color = subset()$name_common))+
-      geom_smooth(formula = y~x+x^2, se = FALSE)+
-      geom_line(alpha = 0.30)+
-      geom_point(alpha = 0.65)+
+      geom_smooth(formula = y~x+x^2, se = FALSE, size = 1.5)+
+      geom_line(alpha = 0.20)+
+      geom_point(alpha = 0.5)+
       scale_y_continuous(breaks = seq(-4,13,1), limits = c(-4,13)) + 
       scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
       labs(x="Age", y = "War", color = "Players")+
@@ -206,6 +237,7 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
   positions<-reactive({complete_dataset%>% 
       filter(tier == input$tier)%>%
       filter(POS %in% input$position)
+
   })
   
   output$posPlot <- renderPlot({
@@ -227,6 +259,103 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
       theme(axis.title = element_text(colour = "black" ),
             legend.position = "none")
   })
+  
+
+  
+#tab 4 --------------------------
+ 
+
+   
+output$salaryPlot <-renderPlot({
+  
+  salary_dataset%>%
+    mutate(tier = as.factor(tier))%>%
+    group_by(tier,age)%>%
+    mutate( player_count = n(), ave_st_salary_age= median(standard_salary))%>%
+    filter(player_count > 5)%>%
+    ggplot(aes(x= age, y= ave_st_salary_age, group = tier, color = tier))+
+    geom_smooth(level = 0.50) +
+    scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
+    labs(x= "Age", y= "Standardized Salaries", 
+         title = "Salary Curves for MLB Hitters", 
+         caption = "Lahman Database and Baseball Reference")
+  
+})
+
+  
+
+  new_salaries<-reactive({salary_dataset%>% 
+      filter(tier == input$salary_tier)%>%
+      filter(POS %in% input$salary_position)
+    
+  })
+
+output$salaryposPlot <- renderPlot({
+  
+  new_salaries()%>%
+    group_by(age, POS)%>%
+    mutate(people = n(),ave_salary = mean(standard_salary))%>%
+    filter(people>1)%>%
+    
+    # draws line plot for player chosen
+    
+    ggplot(aes(x=age, y=ave_salary))+
+    geom_smooth(se= FALSE, aes(color= POS))+
+    scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
+    scale_y_continuous(breaks = seq(-1,2,0.5), limits = c(-1,2)) +
+    labs(x="Age", y = "Standard Salary", color = "Position")+
+    theme_fivethirtyeight()+
+    theme(axis.title = element_text(colour = "black" ))
+})
+
+    
+max_salary<-salary_dataset%>%group_by(bbrefID)%>%
+  filter(years >=6)%>%filter(salary == max(salary))%>%filter(WAR == max(WAR))%>%
+  mutate(age_highest_salary = age, 
+         war_highest_salary = WAR,
+         salary_highest_salary = salary)%>%
+  select(bbrefID, year_ID,age_highest_salary, war_highest_salary, salary_highest_salary)
+
+
+max_WAR<-salary_dataset%>%group_by(bbrefID)%>%
+  filter(years >=6)%>%filter(WAR == max(WAR))%>%filter(salary == max(salary))%>%
+  mutate(age_highest_war = age, 
+         war_highest_war = WAR,
+         salary_highest_war = salary)%>%
+  select(bbrefID, year_ID,age_highest_war, war_highest_war, salary_highest_war)
+     
+ max_comparison<-max_WAR%>%inner_join(max_salary, by= "bbrefID")
+ 
+ 
+  
+ peak_comparison<-reactive({
+   
+   salary_dataset%>%inner_join(max_comparison, by= "bbrefID")%>%
+     filter(tier == input$salary_tier)
+ })
+ 
+ output$peakTable<-render_gt({
+ 
+ peak_comparison()%>%
+   mutate(age_highest_war = as.numeric(age_highest_war), age_highest_salary= as.numeric(age_highest_salary))%>%
+   group_by(POS)%>%
+   summarise(avg_age_war = mean(age_highest_war), avg_age_salary= mean(age_highest_salary))%>%
+   gt()%>%
+   cols_label(POS= "Position",
+              avg_age_war = "Age of Peak War",
+              avg_age_salary= "Age of Peak Salary")%>%
+   fmt_number(columns= vars(avg_age_war, avg_age_salary), decimals= 0)
+ 
+ 
+    
+    
+  })
+  
+
+
+  
+  
+
   
 }
 
