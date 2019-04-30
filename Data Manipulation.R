@@ -6,33 +6,51 @@ library(robustHD)
 library(lubridate)
 library(fs)
 
+#get WAR data from this source
+
 download.file("https://www.baseball-reference.com/data/war_daily_bat.txt", dest ="bbref.csv", mode = "wb")
+
+#I get all the dat from the Lahman library in R, except the People file is not
+#included. So I downloded from the web
 
 download.file("https://github.com/chadwickbureau/baseballdatabank/archive/v2019.2.zip", 
               destfile = "Lahman_Data.zip",
               mode = "wb")
-
 untar("Lahman_Data.zip")
-
-
 People<-read_csv("./baseballdatabank-2019.2/core/People.csv")
+
+# no longer need these files 
+
 
 file_delete(c("baseballdatabank-2019.2/", "Lahman_Data.zip"))
 
+#read in data that includes WAR 
+
 bbref <- read_csv("bbref.csv", col_types = cols(WAR = col_number(), salary = col_number()))
 
-rookie_year<-People%>% group_by(playerID) %>% mutate(rookie = year(debut))%>%ungroup()
+
+#creating rookie year variable. 
+
+rookie_year<-People%>% 
+  group_by(playerID) %>% 
+  mutate(rookie = year(debut))%>%
+  ungroup()
+
+#only needs these variables for my analysis 
+
+debut<-rookie_year %>%
+  select(playerID, rookie, birthCountry, birthState, height, weight)
+
+#combine with the master that has IDs compatible to baseball reference dataset
+
+rookie_only<-left_join(debut, Master, by= "playerID")%>%
+  filter(!is.na(rookie))%>%
+  select(playerID,bbrefID,nameFirst, nameLast, height.y, weight.y,bats,throws,rookie,birthCountry.y,birthState.y)
 
 
-debut<-rookie_year %>%select(playerID, rookie, birthCountry, birthState, height, weight)
-
-
-rookie_only<-left_join(debut, Master, by= "playerID")
-
-rookie_only<-rookie_only%>%filter(!is.na(rookie))%>%select(playerID,bbrefID,nameFirst, nameLast, height.y, weight.y,bats,throws,rookie,birthCountry.y,birthState.y)
-
-
-
+# different players have played different positions across there careers. Thus
+# here, I am assigning each player to the one positons he played the majority of
+# his games at
 
 positions<-Fielding%>%
   group_by(playerID)%>%
@@ -46,9 +64,13 @@ positions<-Fielding%>%
   filter(total_games > 162)%>%
   distinct(playerID, POS)
 
+#this is all the data i need from Lahman datasets combined with positions 
 
 
 Lahman_needed<-rookie_only%>%left_join(positions, by="playerID")
+
+#the salary data I have only goes back to 1950 so I only wanted to include
+#players that were rookies in 1950 onward to 2018
 
 Lahman_all<-Lahman_needed%>%filter(rookie>=1950 & !is.na(rookie))%>%
   select(playerID,POS,bbrefID,height.y,weight.y,bats,throws,rookie,birthCountry.y,birthState.y)%>% ungroup()
