@@ -129,9 +129,11 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
           mainPanel(
             h5("For my analysis of salaries, you will notice I used Standard Salaries
                instead of just Salary. This is because the datset goes all the way back 
-               to 1950. The effects of inflation and the shear amount of money in baseball
-               today distort the graphs. Thus I standardized salaries for each year meaning 
-               the y axis is salaries compared to the rest of the league in that year."),
+               to 1950. The effects of inflation and the difference in the amount of money 
+              in baseball today distorts the graphs. Thus I standardized salaries for each year 
+              meaning the y axis is salaries compared to the rest of the league in that year. Thus, 
+               values close to 0 are near the average salary in a particular year, while +/- 2 are
+               either extremely large or small salaries respectively"),
             
             plotOutput("salaryPlot"),
             br(),
@@ -144,19 +146,19 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
             br(),
             h3("Conclusions"),
             br(),
-            h5("Salaries peak way later than when performance peak.
-               We can see that in the graphs as well as the table. 
+            h5("Salaries peak way later than when performance peaks.
+               We can see that in the graphs as well as in the table. 
                The problem is MLB teams are paying for what the player was,
                not necessarily who the player will become. All the ages of 
                the peak salary are easily within the declining years of careers.
                Many contracts are back heavy, meaning salaries increase gradually
                each year of the contract, which is extremely inefficient seeing how 
-               players decline in performance usually this late in their careers.
+               players decline in performance this late in their careers.
                The data I use for these plots goes back to 1950. It would be interesting to
                see if subsetting the data to the Moneyball era and recent years has an effect 
-               on age of peak salary. Certainly how the market has been over the past few offseasons,
+               on age of peak salary. Certainly with how the market has been over the past few offseasons,
                I would assume that there would be a difference as teams now do not want to sign these 
-               long end loaded contracts and waste money on the decline of once great players.")
+               long contracts and waste money on the decline of once great players.")
             
           )
            )
@@ -203,26 +205,26 @@ server <- function(input, output) {
   output$warExplanation<-renderUI({
 
 ex_1<-p("As I have watched the last few Baseball Offseasons unfold, I have become extremely interested in the 
-new trends Major League Baseball Teams have have approached signing players.No longer are the best free agent 
+new trends Major League Baseball Teams have approached signing players. No longer are the best free agent 
 bats being signed to the largest per year value contracts. Bryce Harper's $330 Million Dollar Contract has been 
 lauded over for being the largest free agent contract in American Sports History; however, it is nothing compared 
 to what he was projected to receive a few years earlier in the neighborhood of the $400 over 10 years. Yes, it may 
 be the largest sum of salary contract, but when you look at the salary per year, which is roughly 25 million per 
 year over 13 years, he is not even in the top 10 of per year value. It was rumored the Giants were in on Bryce Harper
 offering around $40 million per year; however for a short period of time. In the current market we are seeing an interesting 
-trade off between contract longetivity and per year value. I believe this is due to player's aging curves. Player performance
+trade off between contract longevity and per year value. I believe this is due to player's aging curves. Player performance
 and age are not a linear relationship; however, they tend to be curved, improving gradually until a certain age then a 
 decline. MLB teams are willing to pay for a players prime, but in doing so they will also have to deal with overpaying for 
-the players eventual decline. Aging Curves and being able to predict a players future are becoming an increasing part of 
+the player's eventual decline. Aging Curves and being able to predict a players future are becoming an increasing part of 
 the game today. Through this project, I seek to better understand aging curves myself as well as help you.
 ")
 
 ex_2<- p("I will use Wins Above Replace (WAR) as a metric that takes into account all aspects
-of the game to analyze performance curves. The goals for this project are to compare the improvement 
-and eventual decline of all batters careers dating back to 1950. I wil compare players across 
+of the game including offense, defense, and running to analyze performance curves. The goals for this project are to 
+compare the improvement and eventual decline of all batters' careers dating back to 1950. I wil compare players across 
 generations aging curves to show how the career paths of today's stars compare to legends of 
 the past. I also compare players' position to see if different types of of players age differently.
-Finally,I dig into salaries to see how salaries change as player age compared to performance.")
+Finally, I dig into salaries to see how salaries change as players age compared to their performance.")
   
 
 
@@ -342,7 +344,8 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
             curves would not be representative. By taking the z-score of the average WAR
             for each player across their career, I broke the dataset into 5 tiers, tier 1
             being the very best to ever play the game. Even they show the same levels 
-            of decline as they age.")  
+            of decline as they age. This tiered breakdown of the data is the same groupings 
+            I use for the entire project.")  
   
     HTML(paste(ex_1))
   })
