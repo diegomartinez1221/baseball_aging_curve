@@ -92,7 +92,22 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                                   choices = c("C","1B", "2B","3B","SS","OF"), 
                                   selected = "OF")),
              mainPanel(
-               plotOutput("posPlot")
+               plotOutput("posPlot"),
+               h5( "Footnote: OF includes all 3 outfield positions, the dataset did not split players
+                   into their specific outfield positons. The gradual decline may seem odd as 
+                   Center Field is a very difficult position to play; however, it is gradual 
+                   because all Outfielders are lumped together. Also, Center Fielders usually
+                   transition to the easier Corner Outfield positions as they get older."),
+               br(),
+               br(),
+               h3("Insights"),
+               br(),
+               h4("Players at harder defensive positions have a steeper decline.
+                  This is especially evident looking at catchers. The wear and tear on the
+                  knees from squatting seems to really hamper careers. Shortstops also show
+                  really steep drop offs as it is also one of the hardest positions on the
+                  diamond to play. Typical hitting positions like First Base and Outfield exhibit
+                  a more gradual decline, which extends their careers.")
              )
              
              
@@ -117,48 +132,57 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                radioButtons("salary_tier", 
                             "Tier:", 
                             unique(salary_dataset$tier),
-                            selected = "1"),
-               
-               #same concept as checkbox for position aging curves, also need a
-               #different input name
-               
-               checkboxGroupInput("salary_position",
-                                  "Position:",
-                                  choices = c("C","1B", "2B","3B","SS","OF"), 
-                                  selected = "OF")),
+                            selected = "1")
+    
+              ),
           mainPanel(
-            h5("For my analysis of salaries, you will notice I used Standard Salaries
+            h4("For my analysis of salaries, you will notice I used Standard Salaries
                instead of just Salary. This is because the datset goes all the way back 
                to 1950. The effects of inflation and the difference in the amount of money 
               in baseball today distorts the graphs. Thus I standardized salaries for each year 
               meaning the y axis is salaries compared to the rest of the league in that year. Thus, 
                values close to 0 are near the average salary in a particular year, while +/- 2 are
-               either extremely large or small salaries respectively"),
+               either extremely large or small salaries respectively."),
             
             plotOutput("salaryPlot"),
             br(),
             br(),
-            plotOutput("salaryposPlot"),
+            gt_output("peakTable1"),
             br(),
             br(),
-            gt_output("peakTable"),
+            gt_output("peakTable2"),
+            h5("Peak Salary Age has gone down indicating changes in how MLB
+               Teams approach paying playes. Peak WAR seems to have decreased
+               in some positions; however, this is due to having players that are
+               still very young in the last year of the dataset, 2018, and have not 
+               reached the age of when players usually peak around 27-28. The importance
+               is the gap between Peak WAR (27-28) and Salary is down from the previous
+               table."),
             br(),
             br(),
             h3("Conclusions"),
             br(),
-            h5("Salaries peak way later than when performance peaks.
-               We can see that in the graphs as well as in the table. 
-               The problem is MLB teams are paying for what the player was,
+            h4("Salaries peak way later than when performance peaks.
+               We can see this in the graphs as well as in the tables. 
+               The problem is MLB teams are having to pay for what the player was,
                not necessarily who the player will become. All the ages of 
-               the peak salary are easily within the declining years of careers.
-               Many contracts are back heavy, meaning salaries increase gradually
-               each year of the contract, which is extremely inefficient seeing how 
-               players decline in performance this late in their careers.
-               The data I use for these plots goes back to 1950. It would be interesting to
-               see if subsetting the data to the Moneyball era and recent years has an effect 
-               on age of peak salary. Certainly with how the market has been over the past few offseasons,
-               I would assume that there would be a difference as teams now do not want to sign these 
-               long contracts and waste money on the decline of once great players.")
+              peak salary are easily within the declining years of careers.
+               Many contracts have been back heavy, meaning salaries increase gradually
+               each year of the contract. This is extremely inefficient seeing how 
+               players decline in performance this late in their careers and as they get worse 
+              you are paying them more and more.
+
+              Consecutively, 27-28 is when most players enter free agency, the time when players are
+              allowed into the open market and when players sign big money contracts. As we 
+              have seen, around 27-28 is when players hit their peak thus the free agency system
+              is set up in a way where free agent signings capture the entire decline of a player's career.
+              However, we see a tightening of the gap between Peak Performance and Peak Salary
+              in recent years. Front Offices are being smarter and must be taking aging 
+              factors into account in their models of player evaluation. If they are going to sign
+               someone for a long period, they will lower the per year value like what occured with
+               Bryce Harper. Going forward, perhaps we will see teams begin to structure salaries 
+              like aging curves with a peak that correlates with the ages of peak performance and 
+               then declines as the player gets older.")
             
           )
            )
@@ -171,10 +195,13 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
            mainPanel(
              h5("This project was created for Gov 1005: Data, a course taught by David Kane at Harvard University."),
              br(),
-             h5("I would like to give thanks to Sean Lahman for compiling", a("the Lahman Baseball Database", href="http://www.seanlahman.com/baseball-archive/statistics/"), "and
-             Baseball Reference for", a("WAR Data", href = "https://www.baseball-reference.com/data/war_daily_bat.txt"), "which is updated daily."),
+             h5("I would like to give thanks to Sean Lahman for compiling the", a("Lahman Baseball Database", 
+                href="http://www.seanlahman.com/baseball-archive/statistics/"), "and Baseball Reference for", 
+                a("WAR Data", href = "https://www.baseball-reference.com/data/war_daily_bat.txt"), "which is
+                updated daily."),
              br(),
-             h5("A link to my Github repository can be found", a("here.", href = "https://github.com/diegomartinez1221/baseball_aging_curve"))
+             h5("A link to my Github repository can be found",
+                a("here.", href = "https://github.com/diegomartinez1221/baseball_aging_curve"))
            )
            )
   
@@ -229,12 +256,12 @@ Finally, I dig into salaries to see how salaries change as players age compared 
 
 
 ex_3<- p(strong("WAR"))
-ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric baseball community to summarize 
+ex_4<- p("Wins Above Replacement (WAR) is an attempt by the sabermetric baseball community to summarize 
          a player’s total contributions to their team in one statistic. You should always use more than 
          one metric at a time when evaluating players, but WAR is all-inclusive and provides a useful 
-         reference point for comparing players (Fangraphs).'A negative WAR= Worse than Minor League Replacement, 0-1=Scrub,
+         reference point for comparing players (Fangraphs). A negative WAR= Worse than Minor League Replacement, 0-1=Scrub,
          1-2= Role Player, 2-3=Solid Player, 3-4=High Quality Starter, 4-5= All Star, 5-6 = Superstar Talents,
-        6+= MVP or Hall of Fame Caliber. To help you become more familiar with the statistics,
+        6+= MVP or Hall of Fame Caliber. To help you become more familiar with the statistic,
          I have created this histogram so you can understand the range and distribution of WAR, which 
         as you can see is skewed to the right.")
 
@@ -442,10 +469,17 @@ ex_4<- p("'Wins Above Replacement (WAR) is an attempt by the sabermetric basebal
       
       scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
       scale_y_continuous(breaks = seq(-1,7,1), limits = c(-1,7)) +
-      labs(x="Age", y = "War", color = "Players")+
+      
+      #formatting and adding meaningful titles and caption explanation.
+      
+      labs(x="Age",
+           y = "War",
+           color = "Players")+ 
       theme_fivethirtyeight()+
       theme(axis.title = element_text(colour = "black" ),
-            legend.position = "none")
+            legend.position = "none",
+            plot.caption = element_text(hjust = 0)
+            )
   })
   
 
@@ -484,30 +518,6 @@ output$salaryPlot <-renderPlot({
   
 })
 
-  # same code for the position graph from the previous panel, except using
-  # salary dataset and salaries for analysis
-
-  new_salaries<-reactive({salary_dataset%>% 
-      filter(tier == input$salary_tier)%>%
-      filter(POS %in% input$salary_position)
-    
-  })
-
-output$salaryposPlot <- renderPlot({
-  
-  new_salaries()%>%
-    group_by(age, POS)%>%
-    mutate(people = n(),ave_salary = mean(standard_salary))%>%
-    filter(people>1)%>%
-    ggplot(aes(x=age, y=ave_salary))+
-    geom_smooth(se= FALSE, aes(color= POS))+
-    scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
-    scale_y_continuous(breaks = seq(-1,2,0.5), limits = c(-1,2)) +
-    labs(x="Age", y = "Standard Salary", color = "Position",
-         title = "Salary Curves by Position")+
-    theme_fivethirtyeight()+
-    theme(axis.title = element_text(colour = "black" ))
-})
 
 #creating variables for the table at the bottom of the page. I created at what
 #age do players earn their highest salary as well as at what age do players
@@ -548,20 +558,22 @@ max_WAR<-salary_dataset%>%group_by(bbrefID)%>%
      filter(tier == input$salary_tier)
  })
  
- output$peakTable<-render_gt({
+ output$peakTable1<-render_gt({
  
  peak_comparison()%>%
   
    # ages were for some reason character variables
           
-   mutate(age_highest_war = as.numeric(age_highest_war), age_highest_salary= as.numeric(age_highest_salary))%>%
+   mutate(age_highest_war = as.numeric(age_highest_war),
+          age_highest_salary= as.numeric(age_highest_salary))%>%
    group_by(POS)%>%
      
    #find the averages to be able to compare.  
      
-   summarise(avg_age_war = mean(age_highest_war), avg_age_salary= mean(age_highest_salary))%>%
+   summarise(avg_age_war = mean(age_highest_war), 
+             avg_age_salary= mean(age_highest_salary))%>%
    gt()%>%
-   tab_header(title = "Comparing Age of Peak Performance to Age of Highest Pay")%>%
+   tab_header(title = "Comparing Ages of Peak Performance and Highest Pay, 1950-2018")%>%
    cols_label(POS= "Position",
               avg_age_war = "Age of Peak War",
               avg_age_salary= "Age of Peak Salary")%>%
@@ -576,7 +588,38 @@ max_WAR<-salary_dataset%>%group_by(bbrefID)%>%
   })
  
  
-
+ output$peakTable2<-render_gt({
+   
+   peak_comparison() %>%
+     
+     #only keeping players from recent years
+     
+     filter(year_ID>2013)%>%
+     
+     # ages were for some reason character variables
+     
+     mutate(age_highest_war = as.numeric(age_highest_war), 
+            age_highest_salary= as.numeric(age_highest_salary))%>%
+     group_by(POS)%>%
+     
+     #find the averages to be able to compare.  
+     
+     summarise(avg_age_war = mean(age_highest_war), avg_age_salary= mean(age_highest_salary))%>%
+     gt()%>%
+     tab_header(title = "How Peaks Have Changed in Recent Years, 2013-218")%>%
+     cols_label(POS= "Position",
+                avg_age_war = "Age of Peak War",
+                avg_age_salary= "Age of Peak Salary")%>%
+     
+     # do not need any decimals for age.
+     
+     fmt_number(columns= vars(avg_age_war, avg_age_salary), decimals= 0)
+   
+   
+   
+   
+ })
+ 
 
   
   
