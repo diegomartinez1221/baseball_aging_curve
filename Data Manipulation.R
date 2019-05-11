@@ -17,6 +17,7 @@ download.file("https://github.com/chadwickbureau/baseballdatabank/archive/v2019.
               destfile = "Lahman_Data.zip",
               mode = "wb")
 untar("Lahman_Data.zip")
+
 People<-read_csv("./baseballdatabank-2019.2/core/People.csv")
 
 # no longer need these files 
