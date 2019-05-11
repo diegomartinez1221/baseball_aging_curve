@@ -26,12 +26,13 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
            mainPanel(
              
   #histogram of War plot 
+             
              plotOutput("histPlot"),
              
              br(),
              br(),
              
-   #exlanation of first analysis of aging curves. created in the server.  
+   #explanation of first analysis of aging curves. created in the server.  
    
              htmlOutput("plotExplanation"), 
              
@@ -50,8 +51,9 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
            
            titlePanel("Individual Aging Curves"),
            
-           # Select player from dropdown menu for their aging curve graph.
-           #multiple can be selected for comparison
+           #Select player from dropdown menu for their aging curve graph.
+           #multiple can be selected for comparison. Albert Pujols is a good
+           #current player with a typical aging curve to reference
            
            sidebarLayout(
              sidebarPanel(
@@ -152,12 +154,12 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
             br(),
             gt_output("peakTable2"),
             h5("Peak Salary Age has gone down indicating changes in how MLB
-               Teams approach paying playes. Peak WAR seems to have decreased
+               Teams approach paying players. Peak WAR seems to have decreased
                in some positions; however, this is due to having players that are
                still very young in the last year of the dataset, 2018, and have not 
                reached the age of when players usually peak around 27-28. The importance
-               is the gap between Peak WAR (27-28) and Salary is down from the previous
-               table."),
+              of this table is the gap between Peak WAR (27-28) and Salary Age has decreased
+              from the previous table."),
             br(),
             br(),
             h3("Conclusions"),
@@ -501,7 +503,8 @@ output$salaryPlot <-renderPlot({
     
     #mean standard salary per age created 
     
-    mutate( player_count = n(), ave_st_salary_age= mean(standard_salary))%>%
+    mutate( player_count = n(), 
+            ave_st_salary_age= mean(standard_salary))%>%
     
     #do not want few random points to influence graph. 
     
@@ -509,7 +512,9 @@ output$salaryPlot <-renderPlot({
     
     #graph for each tiers salary as they age
     
-    ggplot(aes(x= age, y= ave_st_salary_age, group = tier, color = tier))+
+    ggplot(aes(x= age, y= ave_st_salary_age, 
+               group = tier,
+               color = tier))+
     geom_smooth(level = 0.50) +
     scale_x_continuous(breaks = seq(17,48,1), limits = c(17,48)) +
     labs(x= "Age", y= "Standardized Salaries", 
