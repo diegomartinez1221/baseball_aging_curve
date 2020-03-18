@@ -17,7 +17,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
   tabPanel("Introduction",
            
   #descriptive title to engage viewers       
-           titlePanel("Aging Curves Affect On Major League Baseball"),
+           titlePanel("Aging Curves of Major League Baseball Hitters"),
   
   #explaining project, created in the server. 
   
@@ -66,7 +66,15 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
              # Show aging curve plot
              
              mainPanel(
-               plotOutput("linePlot")
+               plotOutput("linePlot"),
+               br(),
+               br(),
+               h4("As you will notice by searching and comparing different players, not everyone
+                  has the same career trajectories. The nice curves from the previous page
+                  are only the averages of all the various shaped curves. Not all players peak exactly 
+                  around 28 and not everyone will begin to decline shortly after, many players 
+                  plateau for awhile. However, this is a fun tool to compare many of the greats
+                  in history!")
              )
            )
   ),
@@ -97,8 +105,8 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                plotOutput("posPlot"),
                h5( "Footnote: OF includes all 3 outfield positions, the dataset did not split players
                    into their specific outfield positons. The gradual decline may seem odd as 
-                   Center Field is a very difficult position to play; however, it is gradual 
-                   because all Outfielders are lumped together. Also, Center Fielders usually
+                   Center Field is a very difficult position to play; however, this may be due 
+                   to all Outfielders being lumped together. Also, Center Fielders tend to
                    transition to the easier Corner Outfield positions as they get older."),
                br(),
                br(),
@@ -120,7 +128,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
            
            #title 
            
-           titlePanel("Salary Curves Do Not Immitate Performance Curves"),
+           titlePanel("Salary Curves Do Not Imitate Performance Curves"),
            sidebarLayout(fluid = TRUE,
              sidebarPanel(
                
@@ -129,7 +137,7 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                #from previous tab or else both buttons will influence both
                #graphs on each panel
           
-              
+          
                
                radioButtons("salary_tier", 
                             "Tier:", 
@@ -174,10 +182,15 @@ ui <- fluidPage(theme = shinytheme("superhero"),tabsetPanel(
                players decline in performance this late in their careers and as they get worse 
               you are paying them more and more.
 
-              Consecutively, 27-28 is when most players enter free agency, the time when players are
+              Consecutively, 27-29 is when most players enter free agency, the time when players are
               allowed into the open market and when players sign big money contracts. As we 
-              have seen, around 27-28 is when players hit their peak thus the free agency system
-              is set up in a way where free agent signings capture the entire decline of a player's career.
+              have seen, around 27-29 is when players hit their peak thus the free agency system
+              is set up in a way where free agent signings are coming off some of the best years of their
+              career. The term 'Free Agency Year' refers to the year before a 
+              player hits the open market where a player hopes to play at his best to garner a larger contract
+              the next year. Thus, it must be extremely difficult to not want to offer a large contract
+              to a player performing extremely well the past few years while trying also forecast future 
+              performance because a decline is sure to come.  
               However, we see a tightening of the gap between Peak Performance and Peak Salary
               in recent years. Front Offices are being smarter and must be taking aging 
               factors into account in their models of player evaluation. If they are going to sign
@@ -234,13 +247,13 @@ server <- function(input, output) {
   output$warExplanation<-renderUI({
 
 ex_1<-p("As I have watched the last few Baseball Offseasons unfold, I have become extremely interested in the 
-new trends Major League Baseball Teams have approached signing players. No longer are the best free agent 
-bats being signed to the largest per year value contracts. Bryce Harper's $330 Million Dollar Contract has been 
-lauded over for being the largest free agent contract in American Sports History; however, it is nothing compared 
-to what he was projected to receive a few years earlier in the neighborhood of the $400 over 10 years. Yes, it may 
+new ways Major League Baseball Teams have approached signing players. No longer are the best free agent 
+bats being signed to the largest per year value contracts. Bryce Harper's $330 Million Dollar contract 
+is the largest free agent contract in American Sports History; however, it is not what he was projected to 
+receive a few years earlier in the neighborhood of the $400 over 10 years. Yes, it may 
 be the largest sum of salary contract, but when you look at the salary per year, which is roughly 25 million per 
-year over 13 years, he is not even in the top 10 of per year value. It was rumored the Giants were in on Bryce Harper
-offering around $40 million per year; however for a short period of time. In the current market we are seeing an interesting 
+year over 13 years, he is not in the top 10 of per year value. It was rumored the Giants were in on Bryce Harper
+offering around $40 million per year; however for a short span of time. In the current market we are seeing an interesting 
 trade off between contract longevity and per year value. I believe this is due to player's aging curves. Player performance
 and age are not a linear relationship; however, they tend to be curved, improving gradually until a certain age then a 
 decline. MLB teams are willing to pay for a players prime, but in doing so they will also have to deal with overpaying for 
@@ -250,7 +263,7 @@ the game today. Through this project, I seek to better understand aging curves m
 
 ex_2<- p("I will use Wins Above Replace (WAR) as a metric that takes into account all aspects
 of the game including offense, defense, and running to analyze performance curves. The goals for this project are to 
-compare the improvement and eventual decline of all batters' careers dating back to 1950. I wil compare players across 
+compare the improvement and eventual decline of all batters' careers dating back to 1950. I will compare players across 
 generations aging curves to show how the career paths of today's stars compare to legends of 
 the past. I also compare players' position to see if different types of of players age differently.
 Finally, I dig into salaries to see how salaries change as players age compared to their performance.")
@@ -261,9 +274,8 @@ ex_3<- p(strong("WAR"))
 ex_4<- p("Wins Above Replacement (WAR) is an attempt by the sabermetric baseball community to summarize 
          a player’s total contributions to their team in one statistic. You should always use more than 
          one metric at a time when evaluating players, but WAR is all-inclusive and provides a useful 
-         reference point for comparing players (Fangraphs). A negative WAR= Worse than Minor League Replacement, 0-1=Scrub,
-         1-2= Role Player, 2-3=Solid Player, 3-4=High Quality Starter, 4-5= All Star, 5-6 = Superstar Talents,
-        6+= MVP or Hall of Fame Caliber. To help you become more familiar with the statistic,
+         reference point for comparing players (Fangraphs). A negative WAR= Worse than Minor League Replacement, 0-2=Role/Bench Player, 2-3=Starter, 3-4=High Quality Starter, 4-5=All Star, 5-6 =Superstar Talents,
+        6+=MVP or Hall of Fame Caliber. To help you become more familiar with the statistic,
          I have created this histogram so you can understand the range and distribution of WAR, which 
         as you can see is skewed to the right.")
 
@@ -374,7 +386,10 @@ ex_4<- p("Wins Above Replacement (WAR) is an attempt by the sabermetric baseball
             for each player across their career, I broke the dataset into 5 tiers, tier 1
             being the very best to ever play the game. Even they show the same levels 
             of decline as they age. This tiered breakdown of the data is the same groupings 
-            I use for the entire project.")  
+            I use for the entire project. Finally, a note on survivorship bias. Approaching
+            the tail end of the distrution of age, these numbers may not be as representative
+            due to a lack of data. Not many players will make it into their late 30s or early 40s,
+            only the very best 38-42 year olds will 'survive' that long in the MLB.")  
   
     HTML(paste(ex_1))
   })
@@ -611,7 +626,7 @@ max_WAR<-salary_dataset%>%group_by(bbrefID)%>%
      
      summarise(avg_age_war = mean(age_highest_war), avg_age_salary= mean(age_highest_salary))%>%
      gt()%>%
-     tab_header(title = "How Peaks Have Changed in Recent Years, 2013-218")%>%
+     tab_header(title = "How Peaks Have Changed in Recent Years, 2013-2018")%>%
      cols_label(POS= "Position",
                 avg_age_war = "Age of Peak War",
                 avg_age_salary= "Age of Peak Salary")%>%
